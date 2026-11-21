@@ -58,6 +58,7 @@ button{border:0;font-weight:bold;cursor:pointer}
 <div id="taskList"></div>
 </div>
 </div>
+  <script>
 // KaamYaad Notification
 const notifyBtn = document.createElement("button");
 notifyBtn.innerText = "🔔 Notification चालू करें";
@@ -83,7 +84,6 @@ notifyBtn.onclick = async function () {
     alert("Notification की अनुमति नहीं मिली");
   }
 };
-<script>
 let tasks=[];
 try{tasks=JSON.parse(localStorage.getItem("kaamyaad_tasks")||"[]")}catch(e){tasks=[]}
 
