@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KaamYaad</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f5ff;color:#172554;font-family:Arial,sans-serif}
+header{background:linear-gradient(135deg,#1261f5,#7639d8);color:white;padding:25px 18px;border-radius:0 0 25px 25px}
+header h1{margin:0;font-size:29px}
+header p{margin:8px 0 0}
+.container{padding:16px;max-width:600px;margin:auto}
+.stats{display:flex;gap:9px}
+.stat{flex:1;background:white;padding:13px 5px;border-radius:14px;text-align:center;box-shadow:0 3px 10px #0001}
+.stat b{display:block;font-size:23px;color:#2861ed;margin-bottom:5px}
+.card{background:white;padding:16px;border-radius:18px;margin-top:16px;box-shadow:0 3px 12px #0001}
+h2{font-size:19px;margin:0 0 14px}
+input,button{font-size:16px;padding:13px;border-radius:11px}
+input[type=text],input[type=date],input[type=time]{width:100%;border:1px solid #d3dced;margin-bottom:10px;background:white}
+button{border:0;font-weight:bold;cursor:pointer}
+.add{background:#2460ec;color:white;width:100%}
+.voice{background:#eee8ff;color:#6636bf;width:100%;margin-top:9px}
+.task{display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;padding:12px 0}
+.task:last-child{border:0}
+.task input[type=checkbox]{width:22px;height:22px;padding:0;margin:0}
+.info{flex:1;word-break:break-word}
+.info small{display:block;color:#64748b;margin-top:5px}
+.done{text-decoration:line-through;opacity:.5}
+.del{background:#ffe6ea;color:#c52346;padding:9px}
+.empty{text-align:center;padding:20px;color:#8491a9}
+</style>
+</head>
+<body>
+<header>
+<h1>⏰ KaamYaad</h1>
+<p>Aapka kaam, ab aapko yaad rahega ❤️</p>
+</header>
+
+<div class="container">
+<div class="stats">
+<div class="stat"><b id="total">0</b>कुल काम</div>
+<div class="stat"><b id="pending">0</b>बाकी</div>
+<div class="stat"><b id="completed">0</b>पूरे</div>
+</div>
+
+<div class="card">
+<h2>➕ नया काम जोड़ें</h2>
+<input id="taskName" type="text" placeholder="यहाँ अपना काम लिखें">
+<input id="taskDate" type="date">
+<input id="taskTime" type="time">
+<button class="add" onclick="addTask()">💾 काम सेव करें</button>
+<button class="voice" onclick="voiceInput()">🎙️ बोलकर काम लिखें</button>
+</div>
+
+<div class="card">
+<h2>📋 मेरे काम</h2>
+<div id="taskList"></div>
+</div>
+</div>
+
+<script>
+let tasks=[];
+try{tasks=JSON.parse(localStorage.getItem("kaamyaad_tasks")||"[]")}catch(e){tasks=[]}
+
+function save(){
+localStorage.setItem("kaamyaad_tasks",JSON.stringify(tasks));
+render();
+}
+
+function addTask(){
+let name=document.getElementById("taskName").value.trim();
+let date=document.getElementById("taskDate").value;
+let time=document.getElementById("taskTime").value;
+if(!name){alert("पहले काम का नाम लिखें");return}
+tasks.unshift({id:Date.now(),name,date,time,done:false});
+document.getElementById("taskName").value="";
+document.getElementById("taskDate").value="";
+document.getElementById("taskTime").value="";
+save();
+}
+
+function toggleTask(id){
+let t=tasks.find(x=>x.id===id);
+if(t)t.done=!t.done;
+save();
+}
+
+function deleteTask(id){
+if(confirm("क्या आप यह काम हटाना चाहते हैं?")){
+tasks=tasks.filter(x=>x.id!==id);
+save();
+}
+}
+
+function render(){
+let list=document.getElementById("taskList");
+list.innerHTML="";
+document.getElementById("total").textContent=tasks.length;
+document.getElementById("pending").textContent=tasks.filter(x=>!x.done).length;
+document.getElementById("completed").textContent=tasks.filter(x=>x.done).length;
+if(!tasks.length){
+list.innerHTML='<div class="empty">अभी कोई काम नहीं 😊</div>';
+return;
+}
+tasks.forEach(t=>{
+let row=document.createElement("div");
+row.className="task";
+let cb=document.createElement("input");
+cb.type="checkbox";
+cb.checked=t.done;
+cb.onchange=()=>toggleTask(t.id);
+let info=document.createElement("div");
+info.className="info"+(t.done?" done":"");
+info.textContent=t.name;
+let small=document.createElement("small");
+small.textContent=(t.date||"तारीख नहीं")+(t.time?" • "+t.time:"");
+info.appendChild(small);
+let del=document.createElement("button");
+del.className="del";
+del.textContent="हटाएँ";
+del.onclick=()=>deleteTask(t.id);
+row.append(cb,info,del);
+list.appendChild(row);
+});
+}
+
+function voiceInput(){
+let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){alert("Voice typing आपके browser में उपलब्ध नहीं है। Chrome में कोशिश करें।");return}
+let r=new SR();
+r.lang="hi-IN";
+r.onresult=e=>document.getElementById("taskName").value=e.results[0][0].transcript;
+r.onerror=()=>alert("आवाज़ नहीं समझ आई। फिर कोशिश करें।");
+r.start();
+}
+
+render();
+</script>
+</body>
+</html>
