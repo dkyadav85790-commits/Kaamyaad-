@@ -58,7 +58,31 @@ button{border:0;font-weight:bold;cursor:pointer}
 <div id="taskList"></div>
 </div>
 </div>
+// KaamYaad Notification
+const notifyBtn = document.createElement("button");
+notifyBtn.innerText = "🔔 Notification चालू करें";
+notifyBtn.style.padding = "12px";
+notifyBtn.style.margin = "10px";
+notifyBtn.style.borderRadius = "10px";
 
+document.body.appendChild(notifyBtn);
+
+notifyBtn.onclick = async function () {
+  if (!("Notification" in window)) {
+    alert("आपके ब्राउज़र में Notification सपोर्ट नहीं है");
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+
+  if (permission === "granted") {
+    new Notification("KaamYaad", {
+      body: "Notification चालू हो गया! अब आपको याद दिलाएँगे 😊"
+    });
+  } else {
+    alert("Notification की अनुमति नहीं मिली");
+  }
+};
 <script>
 let tasks=[];
 try{tasks=JSON.parse(localStorage.getItem("kaamyaad_tasks")||"[]")}catch(e){tasks=[]}
